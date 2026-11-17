@@ -676,51 +676,7 @@ document.getElementById('installBtn').addEventListener('click', async () => {
   }
 });
 </script>
-  <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-const firebaseConfig = {
-  apiKey: "METS-TA-CLE-ICI",
-  authDomain: "arafat-business.firebaseapp.com",
-  projectId: "arafat-business",
-  storageBucket: "arafat-business.appspot.com",
-  messagingSenderId: "METS-LE-ICI",
-  appId: "METS-LE-ICI"
-};
-
-try {
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const ref = doc(db, 'arafat', 'app1');
-  let applying = false, timer = null;
-  const origSet = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function(k, v) { origSet(k, v); queueSave(); };
-  function queueSave(){ if(applying) return; clearTimeout(timer); timer = setTimeout(saveCloud, 1000); }
-  async function saveCloud(){
-    try {
-      const data = {};
-      for(let i=0; i<localStorage.length; i++){ const k = localStorage.key(i); data[k] = localStorage.getItem(k); }
-      data.updatedAt = Date.now();
-      await setDoc(ref, { data: JSON.stringify(data), updatedAt: Date.now() });
-      console.log('Cloud OK');
-    } catch(e){ console.log('Cloud erreur', e); }
-  }
-  onSnapshot(ref, (s) => {
-    if(!s.exists()) return;
-    const d = s.data();
-    if(!d || !d.data) return;
-    try {
-      const cloudData = JSON.parse(d.data);
-      applying = true;
-      for(const k in cloudData){ if(localStorage.getItem(k) !== cloudData[k]) origSet(k, cloudData[k]); }
-      applying = false;
-      location.reload();
-    } catch(e){}
-  });
-} catch(e){ console.log('Cloud indisponible', e); }
-</script>
-  <script type="module">
+<script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, doc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -736,7 +692,7 @@ const firebaseConfig = {
 try {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const ref = doc(db, 'arafat', 'app1');
+  const ref = doc(db, 'arafat-business', 'arafat-business');
   let applying = false, timer = null;
   const origSet = localStorage.setItem.bind(localStorage);
   localStorage.setItem = function(k, v) { origSet(k, v); queueSave(); };
