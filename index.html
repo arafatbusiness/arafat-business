@@ -677,21 +677,47 @@ document.getElementById('installBtn').addEventListener('click', async () => {
 });
 </script>
   <script type="module">
-import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import {getFirestore,doc,getDoc,setDoc,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-const CFG={apiKey:"AIzaSyDsZmENm9Tq5KMgNUUzfC56tGiKvJRNtDc",authDomain:"arafat-business.firebaseapp.com",projectId:"arafat-business",storageBucket:"arafat-business.firebasestorage.app",messagingSenderId:"659075820951",appId:"1:659075820951:web:805c40e34e7e28ccdbe8d2"};
-try{
- const app=initializeApp(CFG);
- const db=getFirestore(app);
- const ref=doc(db,'arafat','app1');
- let last=0, applying=false, timer=null;
- const origSet=localStorage.setItem.bind(localStorage);
- localStorage.setItem=function(k,v){ origSet(k,v); queueSave(); };
- function queueSave(){ if(applying) return; clearTimeout(timer); timer=setTimeout(saveCloud,800); }
- async function saveCloud(){ try{ const ts=Date.now(); last=ts; const all={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); all[k]=localStorage.getItem(k); } await setDoc(ref,{data:JSON.stringify(all),updatedAt:ts})
- const snap=await getDoc(ref);
- if(snap.exists()){ const d=snap.data(); if(d && d.data && d.updatedAt){ last=d.updatedAt; const cloud=JSON.parse(d.data); let changed=false; for(const k in cloud){ if(localStorage.getItem(k)!==cloud[k]){ origSet(k,cloud[k]); changed=true; } } if(changed){ location.reload(); } } }
- onSnapshot(ref,(s)=>{ if(!s.exists()) return; const d=s.data(); if(!d||!d.data||!d.updatedAt) return; if(d.updatedAt<=last) return; last=d.updatedAt; applying=true; try{ const cloud=JSON.parse(d.data); for(const k in cloud){ if(localStorage.getItem(k)!==cloud[k]) origSet(k,cloud[k]); } setTimeout(()=>location.reload(),300); }catch(e){ applying=false; } });
-}catch(e){ console.log('Cloud indisponible',e); }
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "METS-TA-CLE-ICI",
+  authDomain: "arafat-business.firebaseapp.com",
+  projectId: "arafat-business",
+  storageBucket: "arafat-business.appspot.com",
+  messagingSenderId: "METS-LE-ICI",
+  appId: "METS-LE-ICI"
+};
+
+try {
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const ref = doc(db, 'arafat', 'app1');
+  let applying = false, timer = null;
+  const origSet = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(k, v) { origSet(k, v); queueSave(); };
+  function queueSave(){ if(applying) return; clearTimeout(timer); timer = setTimeout(saveCloud, 1000); }
+  async function saveCloud(){
+    try {
+      const data = {};
+      for(let i=0; i<localStorage.length; i++){ const k = localStorage.key(i); data[k] = localStorage.getItem(k); }
+      data.updatedAt = Date.now();
+      await setDoc(ref, { data: JSON.stringify(data), updatedAt: Date.now() });
+      console.log('Cloud OK');
+    } catch(e){ console.log('Cloud erreur', e); }
+  }
+  onSnapshot(ref, (s) => {
+    if(!s.exists()) return;
+    const d = s.data();
+    if(!d || !d.data) return;
+    try {
+      const cloudData = JSON.parse(d.data);
+      applying = true;
+      for(const k in cloudData){ if(localStorage.getItem(k) !== cloudData[k]) origSet(k, cloudData[k]); }
+      applying = false;
+      location.reload();
+    } catch(e){}
+  });
+} catch(e){ console.log('Cloud indisponible', e); }
 </script>
 </body></html>
