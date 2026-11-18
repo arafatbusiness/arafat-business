@@ -685,6 +685,5 @@ window.addEventListener('offline',()=>cSt('☁ Hors ligne : enregistré sur l’
 start();libRun();cInit();
 </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')}</script>
-<script>
 <button onclick="try{var c=0;for(var k in DB){var L=DB[k];if(!L||!L.length)continue;for(var i=0;i<L.length;i++){var p=L[i];var r=String(p.reference||p.ref||'').trim();if(/^[0-9]{3,4}$/.test(r)){p.reference='6PK'+r;if(p.ref!==undefined)p.ref='6PK'+r;c++;}}}alert('Corrige '+c);if(typeof cPush==='function')cPush();else if(typeof cDo==='function')cDo();location.reload();}catch(e){alert('Erreur '+e.message)}" style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#FFD700;color:black;padding:12px 16px;border-radius:10px;border:2px solid black;font-weight:bold;">Corriger Refs</button>
 </body></html>
