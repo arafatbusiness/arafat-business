@@ -686,39 +686,32 @@ start();libRun();cInit();
 </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')}</script>
 <script>
+<script>
 function corrigerRefs(){
-  if(!confirm("Corriger les references ?")) return;
+  if(!confirm("Ajouter 6PK aux references ?")) return;
   var corriges = 0;
-  var listes = [];
-  try{
-    for(var k in DB){
-      if(DB[k] && DB[k].length !== undefined && typeof DB[k] === "object" && DB[k].length > 0) listes.push(DB[k]);
-    }
-  }catch(e){}
-  for(var i=0;i<listes.length;i++){
-    var liste = listes[i];
+  for(var k in DB){
+    var liste = DB[k];
+    if(!liste || !liste.length) continue;
     for(var j=0;j<liste.length;j++){
       var p = liste[j];
       if(!p || typeof p !== "object") continue;
-      var ref = p.reference || p.ref || p.code || "";
-      var des = p.designation || p.nom || p.name || "";
-      ref = String(ref); des = String(des);
-      // Cas 1 : inverse : ref = nom, designation = 6PK / chiffres
-      var desEstRef = des.indexOf("6PK") !== -1 || des.indexOf("6pk") !== -1 || /^[0-9]{3,}$/.test(des.trim());
-      var refEstNom = ref.toLowerCase().indexOf("courroie") !== -1 || ref.toLowerCase().indexOf("dayco") !== -1 || ref.toLowerCase().indexOf("filtre") !== -1 || ref.toLowerCase().indexOf("bougie") !== -1 || ref.toLowerCase().indexOf("plaquette") !== -1 || ref.toLowerCase().indexOf("croix") !== -1;
-      if(desEstRef && refEstNom){
-        if(p.reference !== undefined) p.reference = des;
-        if(p.ref !== undefined) p.ref = des;
-        if(p.designation !== undefined) p.designation = ref;
-        if(p.nom !== undefined) p.nom = ref;
+      var ref = String(p.reference || p.ref || p.code || "").trim();
+      var des = String(p.designation || p.nom || p.name || "");
+      // Si ref = que des chiffres, ex: 950, 1000, 1980
+      if(/^[0-9]{3,4}$/.test(ref)){
+        var nouveau = "6PK" + ref;
+        if(p.reference !== undefined) p.reference = nouveau;
+        if(p.ref !== undefined) p.ref = nouveau;
+        if(p.code !== undefined) p.code = nouveau;
         corriges++;
       }
-      // Cas 2 : 1890 -> 6PK1890
-      var r2 = p.reference || p.ref || "";
-      r2 = String(r2).trim();
-      if(/^[0-9]{4}$/.test(r2)){
-        if(p.reference !== undefined) p.reference = "6PK" + r2;
-        if(p.ref !== undefined) p.ref = "6PK" + r2;
+      // Si ref = 6pk1600 en minuscule -> 6PK1600
+      if(/^6pk[0-9]+$/i.test(ref)){
+        var nouveau2 = "6PK" + ref.replace(/^6pk/i,"");
+        if(p.reference !== undefined) p.reference = nouveau2;
+        if(p.ref !== undefined) p.ref = nouveau2;
+        if(p.code !== undefined) p.code = nouveau2;
         corriges++;
       }
     }
@@ -726,9 +719,8 @@ function corrigerRefs(){
   try{
     if(typeof cPush === "function") cPush();
     else if(typeof cDo === "function") cDo();
-    if(typeof cMark === "function") cMark();
-  }catch(e){ alert("Erreur sync: " + e.message); }
-  alert("Termine ! " + corriges + " produits corriges.");
+  }catch(e){}
+  alert("Termine ! " + corriges + " references corrigees en 6PK");
   location.reload();
 }
 </script>
