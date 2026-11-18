@@ -685,4 +685,55 @@ window.addEventListener('offline',()=>cSt('☁ Hors ligne : enregistré sur l’
 start();libRun();cInit();
 </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')}</script>
+  <script>
+async function corrigerTout(){
+  if(!confirm('Corriger toutes les références et désignations ?')) return;
+  let corriges = 0;
+  try{
+    // Essaie Firestore
+    const db = firebase.firestore();
+    const cols = ['products','produits'];
+    for(const col of cols){
+      const snap = await db.collection(col).get();
+      for(const doc of snap.docs){
+        let d = doc.data();
+        let ref = (d.reference || d.ref || d.Reference || '') + '';
+        let des = (d.designation || d.Designation || d.nom || d.name || '') + '';
+        let newRef = ref.trim();
+        let newDes = des.trim();
+        // Référence : 1600 -> 6PK1600, 6pk1600 -> 6PK1600
+        if(/^[0-9]+$/.test(newRef)) newRef = '6PK' + newRef;
+        if(/^6pk/i.test(newRef)) newRef = '6PK' + newRef.substring(3);
+        newRef = newRef.toUpperCase();
+        // Désignation : Croix -> Courroie, dayco -> Dayco
+        newDes = newDes.replace(/croix/gi, 'Courroie');
+        newDes = newDes.replace(/dayco/gi, 'Dayco');
+        // Première lettre en majuscule
+        newDes = newDes.charAt(0).toUpperCase() + newDes.slice(1);
+        if(newRef !== ref || newDes !== des){
+          let update = {};
+          if(d.reference !== undefined) update.reference = newRef;
+          if(d.ref !== undefined) update.ref = newRef;
+          if(d.Reference !== undefined) update.Reference = newRef;
+          if(d.designation !== undefined) update.designation = newDes;
+          if(d.Designation !== undefined) update.Designation = newDes;
+          if(d.nom !== undefined) update.nom = newDes;
+          await doc.ref.update(update);
+          corriges++;
+        }
+      }
+    }
+    alert('Terminé ! ' + corriges + ' produits corrigés. Actualise la page.');
+    location.reload();
+  }catch(e){ alert('Erreur : ' + e.message); }
+}
+// Crée le bouton automatiquement
+setTimeout(()=>{
+  let btn = document.createElement('button');
+  btn.textContent = '⚙️ Corriger Références';
+  btn.style = 'position:fixed;bottom:80px;right:10px;z-index:9999;padding:10px;background:#FFD700;color:#000;border:2px solid #000;border-radius:10px;font-weight:bold;';
+  btn.onclick = corrigerTout;
+  document.body.appendChild(btn);
+}, 2000);
+</script>
 </body></html>
