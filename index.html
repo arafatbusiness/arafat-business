@@ -685,55 +685,5 @@ window.addEventListener('offline',()=>cSt('☁ Hors ligne : enregistré sur l’
 start();libRun();cInit();
 </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')}</script>
-  <script>
-    <script>
-function corrigerReferences2(){
-  if(!confirm("Corriger toutes les références ?")) return;
-  let corriges = 0;
-  // Cherche tous les tableaux dans DB
-  let listes = [];
-  if(window.DB){
-    for(let k in DB){
-      if(Array.isArray(DB[k])) listes.push(DB[k]);
-    }
-    if(DB.data) for(let k in DB.data){ if(Array.isArray(DB.data[k])) listes.push(DB.data[k]); }
-    if(DB.produits) listes.push(DB.produits);
-    if(DB.products) listes.push(DB.products);
-  }
-  // Cherche aussi dans localStorage
-  for(let key of Object.keys(localStorage)){
-    try{ let v = JSON.parse(localStorage.getItem(key)); if(Array.isArray(v)) listes.push(v); }catch(e){}
-  }
-  listes.forEach(liste=>{
-    liste.forEach(p=>{
-      let ref = p.reference || p.ref || p.code || "";
-      let des = p.designation || p.nom || p.name || p.libelle || "";
-      if(!ref || !des) return;
-      let desEstRef = /6pk|^\d{3,}$/i.test(String(des).trim());
-      let refEstNom = /croix|courroie|dayco|filtre|bougie|plaquette/i.test(String(ref));
-      if(desEstRef && refEstNom){
-        // On inverse
-        if(p.reference!==undefined) p.reference = des; else p.ref = des;
-        if(p.designation!==undefined) p.designation = ref; else if(p.nom!==undefined) p.nom = ref; else p.name = ref;
-        corriges++;
-      }
-      // Réf incomplète : 1890 -> 6PK1890
-      let r2 = p.reference || p.ref || "";
-      if(/^\d{4}$/.test(String(r2).trim()) && /dayco/i.test(String(p.designation||p.nom||""))){
-        if(p.reference!==undefined) p.reference = "6PK"+String(r2).trim();
-        corriges++;
-      }
-    });
-  });
-  // Sauvegarde + sync Firebase
-  try{
-    if(typeof cDo==="function") cDo();
-    if(typeof save==="function") save();
-    localStorage.setItem("abc_dirty","1");
-  }catch(e){}
-  alert("Terminé ! " + corriges + " produits corrigés. Actualise la page.");
-  location.reload();
-}
-</script>
-<button onclick="corrigerReferences2()" style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#FFD700;color:black;padding:12px 16px;border-radius:10px;border:2px solid black;font-weight:bold;">⚙️ Corriger Références</button>
+<button onclick="alert('Bouton OK !')" style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#FFD700;color:black;padding:12px 16px;border-radius:10px;border:2px solid black;font-weight:bold;">TEST BOUTON</button>
 </body></html>
