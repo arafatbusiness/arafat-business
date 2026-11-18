@@ -686,43 +686,5 @@ start();libRun();cInit();
 </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')}</script>
 <script>
-<script>
-function corrigerRefs(){
-  if(!confirm("Ajouter 6PK aux references ?")) return;
-  var corriges = 0;
-  for(var k in DB){
-    var liste = DB[k];
-    if(!liste || !liste.length) continue;
-    for(var j=0;j<liste.length;j++){
-      var p = liste[j];
-      if(!p || typeof p !== "object") continue;
-      var ref = String(p.reference || p.ref || p.code || "").trim();
-      var des = String(p.designation || p.nom || p.name || "");
-      // Si ref = que des chiffres, ex: 950, 1000, 1980
-      if(/^[0-9]{3,4}$/.test(ref)){
-        var nouveau = "6PK" + ref;
-        if(p.reference !== undefined) p.reference = nouveau;
-        if(p.ref !== undefined) p.ref = nouveau;
-        if(p.code !== undefined) p.code = nouveau;
-        corriges++;
-      }
-      // Si ref = 6pk1600 en minuscule -> 6PK1600
-      if(/^6pk[0-9]+$/i.test(ref)){
-        var nouveau2 = "6PK" + ref.replace(/^6pk/i,"");
-        if(p.reference !== undefined) p.reference = nouveau2;
-        if(p.ref !== undefined) p.ref = nouveau2;
-        if(p.code !== undefined) p.code = nouveau2;
-        corriges++;
-      }
-    }
-  }
-  try{
-    if(typeof cPush === "function") cPush();
-    else if(typeof cDo === "function") cDo();
-  }catch(e){}
-  alert("Termine ! " + corriges + " references corrigees en 6PK");
-  location.reload();
-}
-</script>
-<button onclick="corrigerRefs()" style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#FFD700;color:black;padding:12px 16px;border-radius:10px;border:2px solid black;font-weight:bold;">Corriger Refs</button>
+<button onclick="try{var c=0;for(var k in DB){var L=DB[k];if(!L||!L.length)continue;for(var i=0;i<L.length;i++){var p=L[i];var r=String(p.reference||p.ref||'').trim();if(/^[0-9]{3,4}$/.test(r)){p.reference='6PK'+r;if(p.ref!==undefined)p.ref='6PK'+r;c++;}}}alert('Corrige '+c);if(typeof cPush==='function')cPush();else if(typeof cDo==='function')cDo();location.reload();}catch(e){alert('Erreur '+e.message)}" style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#FFD700;color:black;padding:12px 16px;border-radius:10px;border:2px solid black;font-weight:bold;">Corriger Refs</button>
 </body></html>
